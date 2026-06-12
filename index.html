@@ -3,54 +3,71 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Daily Cute Fortune 🎀</title>
+<title>Daily Cute Fortune 💖</title>
 
 <style>
-body{
+*{
     margin:0;
-    height:100vh;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    min-height:100vh;
     overflow:hidden;
+    font-family:Arial,sans-serif;
+    background:linear-gradient(135deg,#ffd8ec,#ffeef8,#fff8fc);
     display:flex;
     justify-content:center;
     align-items:center;
-    background:linear-gradient(135deg,#ffd6e7,#ffeef7,#fff8fc);
-    font-family:Arial,sans-serif;
 }
 
 .card{
     width:90%;
-    max-width:500px;
-    text-align:center;
-    background:rgba(255,255,255,.8);
+    max-width:650px;
+    background:rgba(255,255,255,.85);
     backdrop-filter:blur(10px);
     padding:30px;
-    border-radius:25px;
-    box-shadow:0 10px 30px rgba(255,105,180,.2);
+    border-radius:30px;
+    text-align:center;
+    box-shadow:0 10px 40px rgba(255,105,180,.2);
+    z-index:10;
 }
 
 h1{
-    color:#ff5fa2;
+    color:#ff5ca8;
+    margin-bottom:10px;
 }
 
-.cat{
+.mascot{
     font-size:90px;
+    margin-bottom:10px;
     animation:bounce 2s infinite;
 }
 
 @keyframes bounce{
-    50%{transform:translateY(-10px);}
+    50%{
+        transform:translateY(-12px);
+    }
+}
+
+.moods{
+    margin:15px 0;
+}
+
+.moods button{
+    margin:4px;
 }
 
 button{
-    margin-top:20px;
     border:none;
-    padding:15px 25px;
-    border-radius:50px;
-    font-size:18px;
     cursor:pointer;
-    background:#ff7eb6;
+    padding:12px 18px;
+    border-radius:30px;
+    font-size:16px;
+    background:#ff7db8;
     color:white;
-    transition:.3s;
+    transition:.2s;
 }
 
 button:hover{
@@ -58,20 +75,32 @@ button:hover{
 }
 
 #fortune{
-    margin-top:25px;
+    margin-top:20px;
+    min-height:90px;
     font-size:22px;
-    color:#ff4f97;
-    min-height:80px;
+    color:#ff4c95;
     font-weight:bold;
 }
 
-.heart{
-    position:absolute;
-    font-size:25px;
-    animation:float 6s linear infinite;
+#hearts{
+    margin-top:15px;
+    color:#ff4c95;
+    font-size:20px;
 }
 
-@keyframes float{
+#secret{
+    margin-top:15px;
+    color:#7b4a6d;
+    font-style:italic;
+}
+
+.float{
+    position:absolute;
+    pointer-events:none;
+    animation:rise linear forwards;
+}
+
+@keyframes rise{
     from{
         transform:translateY(100vh);
         opacity:1;
@@ -81,90 +110,258 @@ button:hover{
         opacity:0;
     }
 }
+
+#letter{
+    display:none;
+    margin-top:20px;
+    background:#fff5fb;
+    padding:15px;
+    border-radius:15px;
+    color:#555;
+}
+
+.legendary{
+    animation:flash 0.8s infinite alternate;
+}
+
+@keyframes flash{
+    from{transform:scale(1);}
+    to{transform:scale(1.05);}
+}
 </style>
 </head>
 <body>
 
 <div class="card">
-    <div class="cat">🐱</div>
-    <h1>Daily Cute Fortune</h1>
-    <p>Press the button and receive your magical fortune ✨</p>
 
-    <button onclick="getFortune()">🎀 Draw Fortune 🎀</button>
+<div id="mascot" class="mascot">🐰</div>
 
-    <div id="fortune">
-        Your fortune awaits...
-    </div>
+<h1>🎀 Daily Cute Fortune 🎀</h1>
+
+<p>Select your mood:</p>
+
+<div class="moods">
+<button onclick="setMood('happy')">😊 Happy</button>
+<button onclick="setMood('sad')">😔 Sad</button>
+<button onclick="setMood('tired')">😴 Tired</button>
+<button onclick="setMood('stressed')">😤 Stressed</button>
+<button onclick="setMood('hug')">🥺 Need a Hug</button>
+</div>
+
+<button onclick="drawFortune()">✨ Draw Fortune ✨</button>
+
+<div id="fortune">
+Your magical fortune awaits...
+</div>
+
+<div id="hearts">💖 Hearts: 0</div>
+
+<div id="secret"></div>
+
+<button style="margin-top:15px;" onclick="openLetter()">
+ Open Secret Letter
+</button>
+
+<div id="letter">
+Princess🌸<br><br>
+
+If you're reading this, I hope you're smiling.<br><br>
+
+You are stronger than you realize,
+kinder than you know,
+and more appreciated than you think. 💖<br><br>
+
+Have a beautiful day. ✨
+</div>
+
 </div>
 
 <script>
-const fortunes = [
-"🌸 Today you are 100% adorable.",
-"✨ Your smile has +10 sparkle power.",
-"💖 Someone is lucky to know you.",
-"🎀 The universe thinks you're cute.",
-"🌷 A happy surprise is coming your way.",
-"🦋 You make ordinary days brighter.",
-"☁️ You deserve a cozy and peaceful day.",
-"🌈 Good vibes are following you around.",
-"⭐ Achievement Unlocked: Being Amazing.",
-"💕 Your kindness levels are overpowered.",
-"🐰 Tiny bunny council approves of you.",
-"🌸 Reminder: You are someone's favorite person.",
-"✨ Today's secret mission: Keep being wonderful.",
-"💝 A virtual hug has been delivered."
-];
 
-const fortunesDrawn = new Set();
+let mood="happy";
+let hearts=0;
+let draws=0;
 
-function getFortune(){
-    let fortune =
-      fortunes[Math.floor(Math.random()*fortunes.length)];
+const fortunes={
+happy:[
+"🌈 Your happiness is contagious today.",
+"☀️ Keep shining, sunshine.",
+"✨ You make ordinary days brighter."
+],
+sad:[
+"💖 You are loved more than you know.",
+"🌸 Better days are coming.",
+"🫂 Be gentle with yourself today."
+],
+tired:[
+"😴 Rest is productive too.",
+"⭐ Even stars need sleep.",
+"☁️ You deserve a cozy break."
+],
+stressed:[
+"🌷 One step at a time.",
+"💖 You're doing better than you think.",
+"🎀 Everything doesn't need to be perfect."
+],
+hug:[
+"🫂 Sending a giant virtual hug.",
+"🐰 Bunny cuddle squad deployed.",
+"💖 You don't have to carry everything alone."
+]
+};
 
-    document.getElementById("fortune").innerHTML = fortune;
+function setMood(m){
+    mood=m;
+}
 
-    createHearts();
+function drawFortune(){
 
-    fortunesDrawn.add(fortune);
+    draws++;
+    hearts++;
 
-    if(fortunesDrawn.size >= 5){
-        setTimeout(()=>{
-            alert("🏆 Special Achievement!\nCertified Cutie Level Reached 💖");
-        },300);
+    document.getElementById("hearts").innerHTML=
+    "💖 Hearts: "+hearts;
+
+    const chance=Math.random();
+
+    if(chance<0.01){
+        legendaryFortune();
+        return;
+    }
+
+    const list=fortunes[mood];
+    const msg=list[Math.floor(Math.random()*list.length)];
+
+    document.getElementById("fortune").innerHTML=msg;
+
+    mascotReaction();
+    createMagic();
+
+    unlocks();
+}
+
+function mascotReaction(){
+
+    const mascot=document.getElementById("mascot");
+
+    const pets=["🐰","🐱","🐼","🦊"];
+
+    mascot.innerHTML=
+    pets[Math.floor(Math.random()*pets.length)];
+}
+
+function legendaryFortune(){
+
+    document.getElementById("fortune").innerHTML=
+    "👑 LEGENDARY FORTUNE 👑<br><br>Today's status: Main Character Energy Activated ✨";
+
+    document.getElementById("fortune")
+    .classList.add("legendary");
+
+    for(let i=0;i<60;i++){
+        createMagic();
     }
 }
 
-function createHearts(){
-    for(let i=0;i<15;i++){
-        const heart=document.createElement("div");
-        heart.className="heart";
-        heart.innerHTML=Math.random()>0.5?"💖":"🌸";
+function unlocks(){
 
-        heart.style.left=Math.random()*100+"vw";
-        heart.style.animationDuration=
-            (Math.random()*3+3)+"s";
+    const secret=document.getElementById("secret");
 
-        document.body.appendChild(heart);
+    if(draws===5){
+        secret.innerHTML=
+        "🌸 Just in case nobody told you today: you're wonderful.";
+    }
 
-        setTimeout(()=>{
-            heart.remove();
-        },6000);
+    if(draws===10){
+        secret.innerHTML=
+        "💖 The world is better because you're in it.";
+    }
+
+    if(draws===20){
+        secret.innerHTML=
+        "✨ You're somebody's favorite person.";
+    }
+
+    if(hearts===10){
+        secret.innerHTML=
+        "🌸 Flower Shower Unlocked!";
+        shower("🌸");
+    }
+
+    if(hearts===25){
+        secret.innerHTML=
+        "🐰 Bunny Dance Unlocked!";
+        shower("🐰");
+    }
+
+    if(hearts===50){
+        secret.innerHTML=
+        "🏆 Official Certificate: Certified Amazing Human!";
+    }
+
+    if(hearts===100){
+        secret.innerHTML=
+        "👑 Ultimate Achievement: Certified Human Sunshine ☀️";
+        shower("👑");
     }
 }
 
-setInterval(()=>{
-    const heart=document.createElement("div");
-    heart.className="heart";
-    heart.innerHTML="✨";
-    heart.style.left=Math.random()*100+"vw";
-    heart.style.animationDuration="8s";
+function shower(icon){
 
-    document.body.appendChild(heart);
+    for(let i=0;i<40;i++){
+
+        const el=document.createElement("div");
+
+        el.className="float";
+        el.innerHTML=icon;
+
+        el.style.left=Math.random()*100+"vw";
+        el.style.fontSize=(20+Math.random()*30)+"px";
+        el.style.animationDuration=
+        (3+Math.random()*4)+"s";
+
+        document.body.appendChild(el);
+
+        setTimeout(()=>{
+            el.remove();
+        },7000);
+    }
+}
+
+function createMagic(){
+
+    const items=["💖","🌸","✨","🦋"];
+
+    const el=document.createElement("div");
+
+    el.className="float";
+    el.innerHTML=
+    items[Math.floor(Math.random()*items.length)];
+
+    el.style.left=Math.random()*100+"vw";
+    el.style.fontSize=(20+Math.random()*20)+"px";
+    el.style.animationDuration=
+    (4+Math.random()*4)+"s";
+
+    document.body.appendChild(el);
 
     setTimeout(()=>{
-        heart.remove();
+        el.remove();
     },8000);
-},1000);
+}
+
+function openLetter(){
+
+    const box=document.getElementById("letter");
+
+    box.style.display=
+    box.style.display==="block"
+    ? "none"
+    : "block";
+}
+
+setInterval(createMagic,1000);
+
 </script>
 
 </body>
