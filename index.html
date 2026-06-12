@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Cute Fortune 🎀</title>
+
+<style>
+body{
+    margin:0;
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#ffd6e7,#ffeef7,#fff8fc);
+    font-family:Arial,sans-serif;
+}
+
+.card{
+    width:90%;
+    max-width:500px;
+    text-align:center;
+    background:rgba(255,255,255,.8);
+    backdrop-filter:blur(10px);
+    padding:30px;
+    border-radius:25px;
+    box-shadow:0 10px 30px rgba(255,105,180,.2);
+}
+
+h1{
+    color:#ff5fa2;
+}
+
+.cat{
+    font-size:90px;
+    animation:bounce 2s infinite;
+}
+
+@keyframes bounce{
+    50%{transform:translateY(-10px);}
+}
+
+button{
+    margin-top:20px;
+    border:none;
+    padding:15px 25px;
+    border-radius:50px;
+    font-size:18px;
+    cursor:pointer;
+    background:#ff7eb6;
+    color:white;
+    transition:.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+}
+
+#fortune{
+    margin-top:25px;
+    font-size:22px;
+    color:#ff4f97;
+    min-height:80px;
+    font-weight:bold;
+}
+
+.heart{
+    position:absolute;
+    font-size:25px;
+    animation:float 6s linear infinite;
+}
+
+@keyframes float{
+    from{
+        transform:translateY(100vh);
+        opacity:1;
+    }
+    to{
+        transform:translateY(-120px);
+        opacity:0;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+    <div class="cat">🐱</div>
+    <h1>Daily Cute Fortune</h1>
+    <p>Press the button and receive your magical fortune ✨</p>
+
+    <button onclick="getFortune()">🎀 Draw Fortune 🎀</button>
+
+    <div id="fortune">
+        Your fortune awaits...
+    </div>
+</div>
+
+<script>
+const fortunes = [
+"🌸 Today you are 100% adorable.",
+"✨ Your smile has +10 sparkle power.",
+"💖 Someone is lucky to know you.",
+"🎀 The universe thinks you're cute.",
+"🌷 A happy surprise is coming your way.",
+"🦋 You make ordinary days brighter.",
+"☁️ You deserve a cozy and peaceful day.",
+"🌈 Good vibes are following you around.",
+"⭐ Achievement Unlocked: Being Amazing.",
+"💕 Your kindness levels are overpowered.",
+"🐰 Tiny bunny council approves of you.",
+"🌸 Reminder: You are someone's favorite person.",
+"✨ Today's secret mission: Keep being wonderful.",
+"💝 A virtual hug has been delivered."
+];
+
+const fortunesDrawn = new Set();
+
+function getFortune(){
+    let fortune =
+      fortunes[Math.floor(Math.random()*fortunes.length)];
+
+    document.getElementById("fortune").innerHTML = fortune;
+
+    createHearts();
+
+    fortunesDrawn.add(fortune);
+
+    if(fortunesDrawn.size >= 5){
+        setTimeout(()=>{
+            alert("🏆 Special Achievement!\nCertified Cutie Level Reached 💖");
+        },300);
+    }
+}
+
+function createHearts(){
+    for(let i=0;i<15;i++){
+        const heart=document.createElement("div");
+        heart.className="heart";
+        heart.innerHTML=Math.random()>0.5?"💖":"🌸";
+
+        heart.style.left=Math.random()*100+"vw";
+        heart.style.animationDuration=
+            (Math.random()*3+3)+"s";
+
+        document.body.appendChild(heart);
+
+        setTimeout(()=>{
+            heart.remove();
+        },6000);
+    }
+}
+
+setInterval(()=>{
+    const heart=document.createElement("div");
+    heart.className="heart";
+    heart.innerHTML="✨";
+    heart.style.left=Math.random()*100+"vw";
+    heart.style.animationDuration="8s";
+
+    document.body.appendChild(heart);
+
+    setTimeout(()=>{
+        heart.remove();
+    },8000);
+},1000);
+</script>
+
+</body>
+</html>
